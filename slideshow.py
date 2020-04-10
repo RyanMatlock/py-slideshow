@@ -2,6 +2,7 @@
 """slideshow.py
 
 Copyright (c) 2013, 2015, Corey Goldberg
+              2020,       Ryan Matlock
 
 Dev: https://github.com/cgoldberg/py-slideshow
 License: GPLv3
@@ -73,12 +74,6 @@ def get_scale(window, image):
     return scale
 
 
-window = pyglet.window.Window(fullscreen=True)
-
-
-@window.event
-def on_draw():
-    sprite.draw()
 def next_image():
     print('NEXT!')
 
@@ -146,69 +141,90 @@ def on_key_press(symbol, modifiers):
         pass
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'd', 'dir',
+        '-d', '--dir',
         help='directory of images',
-        # nargs='?', default=os.getcwd()
     )
     parser.add_argument(
-        'p', 'panzoom',
+        '-p', '--panzoom',
         help='enable panning and zooming',
         action='store_true'
     )
     parser.add_argument(
-        't', 'time',
-        help='time image is on screen (in seconds)'
+        '-t', '--time',
+        help='time image is on screen (in seconds)',
+        default=5.0,
+        type=float
     )
     parser.add_argument(
-        'u', 'update',
+        '-u', '--update',
         help='update image stack when new images are added to directory',
+        default=True,
         action='store_true'
     )
     duration = parser.add_mutually_exclusive_group()
     duration.add_argument(
-        'I', 'infinite',
+        '-I', '--infinite',
         help='loop through images infinitely',
+        default=True,
         action='store_true'
     )
     duration.add_argument(
-        'O', 'once',
+        '-O', '--once',
         help='loop through images once',
         action='store_true'
     )
     duration.add_argument(
-        'N', 'ntimes',
+        '-N', '--ntimes',
         help='loop through images N times',
         type=int
     )
     order = parser.add_mutually_exclusive_group()
     order.add_argument(
-        'r', 'random',
+        '-r', '--random',
         help='randomly choose images from directory',
         action='store_true'
     )
     order.add_argument(
-        's', 'sequential',
+        '-s', '--sequential',
         help='sequentially choose images from directory',
+        default=True,
         action='store_true'
     )
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
         parser.exit()
-    args = parser.parse_args()
+    args = vars(parser.parse_args())
+    print(args)
+
+    global window
+    window = pyglet.window.Window(fullscreen=True)
+
+    @window.event
+    def on_draw():
+        sprite.draw()
+
+    window.push_handlers(on_key_press)
 
     _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
 
-    image_paths = get_image_paths(args.dir)
+    global image_paths
+    image_paths = get_image_paths(args['dir'])
+    global img
     img = pyglet.image.load(random.choice(image_paths))
+    global sprite
     sprite = pyglet.sprite.Sprite(img)
     sprite.scale = get_scale(window, img)
 
-    pyglet.clock.schedule_interval(update_image, 6.0)
+    pyglet.clock.schedule_interval(update_image, args['time'])
     pyglet.clock.schedule_interval(update_pan, 1/60.0)
     pyglet.clock.schedule_interval(update_zoom, 1/60.0)
 
     pyglet.app.run()
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
