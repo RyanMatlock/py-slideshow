@@ -4,6 +4,24 @@
 #
 #  Dev: https://github.com/cgoldberg/py-slideshow
 #  License: GPLv3
+"""slideshow.py
+
+Copyright (c) 2013, 2015, Corey Goldberg
+
+Dev: https://github.com/cgoldberg/py-slideshow
+License: GPLv3
+
+
+Modifications:
+- [ ] option to enable pan/zoom (disabled by default)
+- [ ] option to control time image is on screen
+- [ ] option to control transition type (hard or dissolve) -- this might not be
+      trivial with pyglet
+- [ ] option to update images if new ones are added while slideshow is running
+- [ ] option to run infinitely/once through stack of images
+- [ ] option to display images at random or ordered by name
+- [ ] ability to navigate forwards and backwards with arrow keys
+"""
 
 
 import argparse
