@@ -22,7 +22,7 @@ Modifications:
 import argparse
 import random
 import os
-
+import sys
 import pyglet
 
 
@@ -59,7 +59,7 @@ def get_image_paths(input_dir='.'):
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(('jpg', 'png', 'gif')):
+            if file.endswith(('jpg', 'jpeg', 'png', 'gif')):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
     return paths
@@ -79,6 +79,71 @@ window = pyglet.window.Window(fullscreen=True)
 @window.event
 def on_draw():
     sprite.draw()
+def next_image():
+    print('NEXT!')
+
+
+def prev_image():
+    print('jump to prev image')
+
+# maybe I also want to be able to jump to beginning or end of slideshow 🤷
+def first_image():
+    print('jump to first image')
+
+
+def last_image():
+    print('jump to last image')
+
+
+NEXT_KEYS = [
+    pyglet.window.key.RIGHT,
+    pyglet.window.key.DOWN,
+    pyglet.window.key.D,  # as in WASD
+    pyglet.window.key.S,
+    pyglet.window.key.N,  # as in next
+    pyglet.window.key.SPACE,  # eh, seems natural enough
+    pyglet.window.key.L,  # for monsters who use vi 😉
+    pyglet.window.key.J,
+]
+
+PREV_KEYS = [
+    pyglet.window.key.LEFT,
+    pyglet.window.key.UP,
+    pyglet.window.key.A,  # as in WASD
+    pyglet.window.key.W,
+    pyglet.window.key.P,  # as in prev
+    pyglet.window.key.BACKSPACE,  # eh, seems natural enough
+    pyglet.window.key.H,  # for monsters who use vi 😉
+    pyglet.window.key.K,
+]
+
+FIRST_KEYS = [
+    pyglet.window.key.HOME,
+    pyglet.window.key._1,
+]
+
+LAST_KEYS = [
+    pyglet.window.key.END,
+    pyglet.window.key._0,
+]
+
+
+# see
+# https://pyglet.readthedocs.io/en/latest/programming_guide/events.html#stacking-event-handlers
+# def on_key_press(symbol, modifiers):
+#     if symbol == key.SPACE:
+#         fire_laser()
+def on_key_press(symbol, modifiers):
+    if symbol in NEXT_KEYS:
+        next_image()
+    elif symbol in PREV_KEYS:
+        prev_image()
+    elif symbol in FIRST_KEYS:
+        first_image()
+    elif symbol in LAST_KEYS:
+        last_image()
+    else:
+        pass
 
 
 if __name__ == '__main__':
