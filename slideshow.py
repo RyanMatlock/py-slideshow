@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-#
-#  Copyright (c) 2013, 2015, Corey Goldberg
-#
-#  Dev: https://github.com/cgoldberg/py-slideshow
-#  License: GPLv3
 """slideshow.py
 
 Copyright (c) 2013, 2015, Corey Goldberg
@@ -87,12 +82,60 @@ def on_draw():
 
 
 if __name__ == '__main__':
-    _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('dir', help='directory of images',
-                        nargs='?', default=os.getcwd())
+    parser.add_argument(
+        'd', 'dir',
+        help='directory of images',
+        # nargs='?', default=os.getcwd()
+    )
+    parser.add_argument(
+        'p', 'panzoom',
+        help='enable panning and zooming',
+        action='store_true'
+    )
+    parser.add_argument(
+        't', 'time',
+        help='time image is on screen (in seconds)'
+    )
+    parser.add_argument(
+        'u', 'update',
+        help='update image stack when new images are added to directory',
+        action='store_true'
+    )
+    duration = parser.add_mutually_exclusive_group()
+    duration.add_argument(
+        'I', 'infinite',
+        help='loop through images infinitely',
+        action='store_true'
+    )
+    duration.add_argument(
+        'O', 'once',
+        help='loop through images once',
+        action='store_true'
+    )
+    duration.add_argument(
+        'N', 'ntimes',
+        help='loop through images N times',
+        type=int
+    )
+    order = parser.add_mutually_exclusive_group()
+    order.add_argument(
+        'r', 'random',
+        help='randomly choose images from directory',
+        action='store_true'
+    )
+    order.add_argument(
+        's', 'sequential',
+        help='sequentially choose images from directory',
+        action='store_true'
+    )
+
+    if len(sys.argv[1:]) == 0:
+        parser.print_help()
+        parser.exit()
     args = parser.parse_args()
+
+    _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
 
     image_paths = get_image_paths(args.dir)
     img = pyglet.image.load(random.choice(image_paths))
