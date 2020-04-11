@@ -25,6 +25,46 @@ import random
 import os
 import sys
 import pyglet
+import logging
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+
+logging.basicConfig(level=logging.WARNING)
+
+IMG_EXTS = (
+    'jpg',
+    'jpeg',
+    'png',
+    'gif'
+)
+
+class NewImageHandler(PatternMatchingEventHandler):
+    """updates image_paths when new images are added to directory
+    """
+    # not sure if I actually need to convert list comp to list
+    patterns = list([f'*.{ext}' for ext in IMG_EXTS])
+
+    def update_image_paths(current_image_paths, new_image_path):
+        """append new image to current_image_paths
+
+        Args:
+            current_image_paths (list): image paths not yet including the new
+                image
+            new_image_path (str): full path of new image
+
+        Returns:
+            list: updated image paths
+        """
+        return current_image_paths
+
+    def on_created(self, event):
+        logging.debug(f'image created: {event}')
+
+    def on_moved(self, event):
+        logging.debug(f'image moved: {event}')
+
+    def on_deleted(self, event):
+        logging.debug(f'image deleted: {event}')
 
 
 def update_pan_zoom_speeds():
@@ -60,7 +100,7 @@ def get_image_paths(input_dir='.'):
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(('jpg', 'jpeg', 'png', 'gif')):
+            if file.endswith(IMG_EXTS):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
     return paths
@@ -75,19 +115,19 @@ def get_scale(window, image):
 
 
 def next_image():
-    print('NEXT!')
+    logging.debug('NEXT!')
 
 
 def prev_image():
-    print('jump to prev image')
+    logging.debug('jump to prev image')
 
 # maybe I also want to be able to jump to beginning or end of slideshow 🤷
 def first_image():
-    print('jump to first image')
+    logging.debug('jump to first image')
 
 
 def last_image():
-    print('jump to last image')
+    logging.debug('jump to last image')
 
 
 NEXT_KEYS = [
