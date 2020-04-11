@@ -269,22 +269,28 @@ def main():
         default=True,
         action='store_true'
     )
-    duration = parser.add_mutually_exclusive_group()
-    duration.add_argument(
-        '-I', '--infinite',
-        help='loop through images infinitely',
-        default=True,
-        action='store_true'
-    )
-    duration.add_argument(
-        '-O', '--once',
-        help='loop through images once',
-        action='store_true'
-    )
-    duration.add_argument(
+    # duration = parser.add_mutually_exclusive_group()
+    # duration.add_argument(
+    #     '-I', '--infinite',
+    #     help='loop through images infinitely',
+    #     default=True,
+    #     action='store_true'
+    # )
+    # duration.add_argument(
+    #     '-O', '--once',
+    #     help='loop through images once',
+    #     action='store_true'
+    # )
+    # duration.add_argument(
+    #     '-N', '--ntimes',
+    #     help='loop through images N times',
+    #     type=int
+    # )
+    parser.add_argument(
         '-N', '--ntimes',
         help='loop through images N times',
-        type=int
+        type=int,
+        default=-1
     )
     order = parser.add_mutually_exclusive_group()
     order.add_argument(
