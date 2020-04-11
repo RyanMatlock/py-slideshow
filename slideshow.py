@@ -67,6 +67,63 @@ class NewImageHandler(PatternMatchingEventHandler):
         logging.debug(f'image deleted: {event}')
 
 
+class ImagePaths():
+    """keeps track of image paths and place in the list
+    """
+
+    def __init__(self, paths, stop_after=-1, rand_order=False):
+        """
+        Args:
+            paths (list): list of paths to images
+            stop_after (int): if -1, keeps producing next image indefinitely;
+                otherwise, decrements each time it goes from end of _paths to
+                beginning
+            rand_order (bool): if True, list order is randomized
+        """
+        self._pos = 0
+        # tenary operator alert
+        self._paths = random.sample(paths, len(paths)) if rand_order\
+          else paths
+        self._stop_after = stop_after
+        self._rand_order = rand_order
+
+    def insert(self, new_img_path):
+        """
+        Args:
+            new_img_path (str): path to new image
+        """
+        if self._rand_order:
+            # insert somewhere between _pos and end of list
+            rand_index = random.randint(self._pos + 1, len(self._paths))
+            self._paths.insert(rand_index, new_img_path)
+        else:
+            if self._paths is not None:
+                self._paths.append(new_img_path)
+            else:
+                self._paths = [new_img_path]
+
+    def delete(self, deleted_img_path):
+        """seems unlikely, but it could happen ¯\_(ツ)_/¯
+
+        Args:
+            deleted_img_path (str): path to deleted image
+        """
+        pass
+
+    def next(self):
+        pass
+
+    def prev(self):
+        """decrement _pos and return previous element of _paths; if at
+        beginning of _paths, wrap around to the end
+        """
+        if self._pos == 0:
+            self._pos = len(self._paths) - 1
+        else:
+            self._pos -= 1
+        return self._paths[self._pos]
+
+
 def update_pan_zoom_speeds():
     global _pan_speed_x
     global _pan_speed_y
@@ -162,6 +219,14 @@ LAST_KEYS = [
     pyglet.window.key._0,
 ]
 
+# PAUSE_KEYS = [
+#     pyglet.window.key.RETURN,
+# ]
+
+# RESUME_KEYS = [
+#     pyglet.window.key.R,
+# ]
+
 
 # see
 # https://pyglet.readthedocs.io/en/latest/programming_guide/events.html#stacking-event-handlers
@@ -238,7 +303,12 @@ def main():
         parser.print_help()
         parser.exit()
     args = vars(parser.parse_args())
-    print(args)
+    logging.debug(f'args: {args}')
+
+    random.seed()
+
+    global image_paths
+    image_paths = get_image_paths(args['dir'])
 
     global window
     window = pyglet.window.Window(fullscreen=True)
@@ -251,8 +321,6 @@ def main():
 
     _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
 
-    global image_paths
-    image_paths = get_image_paths(args['dir'])
     global img
     img = pyglet.image.load(random.choice(image_paths))
     global sprite
