@@ -71,11 +71,11 @@ class ImagePaths():
     """keeps track of image paths and place in the list
     """
 
-    def __init__(self, paths, stop_after=-1, rand_order=False):
+    def __init__(self, paths, loops_remaining=-1, rand_order=False):
         """
         Args:
             paths (list): list of paths to images
-            stop_after (int): if -1, keeps producing next image indefinitely;
+            loops_remaining (int): if -1, keeps producing next image indefinitely;
                 otherwise, decrements each time it goes from end of _paths to
                 beginning
             rand_order (bool): if True, list order is randomized
@@ -84,7 +84,7 @@ class ImagePaths():
         # tenary operator alert
         self._paths = random.sample(paths, len(paths)) if rand_order\
           else paths
-        self._stop_after = stop_after
+        self._loops_remaining = loops_remaining
         self._rand_order = rand_order
 
     def insert(self, new_img_path):
@@ -111,12 +111,26 @@ class ImagePaths():
         pass
 
     def next(self):
-        pass
+        """increment _pos and return next element of _paths; if at end of
+        _paths AND _loops_remaining > 0, wrap around to beginning of _paths and
+        decrement _loops_remaining
+        """
+        # if self._pos == (len(self._paths) - 1) and self._loops_remaining > 0:
+        #     pass
+        self._pos += 1
+        if self._pos == len(self._paths):
+            if self._loops_remaining > 0:
+                self._pos = 0
+                self._loops_remaining -= 1
+            else:
+                raise IndexError('# of _loops_remaining times exceeded')
+        return self._paths[self._pos]
 
     def prev(self):
         """decrement _pos and return previous element of _paths; if at
         beginning of _paths, wrap around to the end
         """
+        # maybe refactor this so it matches next a little closer
         if self._pos == 0:
             self._pos = len(self._paths) - 1
         else:
