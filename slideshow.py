@@ -119,9 +119,9 @@ class ImagePaths():
         Args:
             deleted_img_path (str): path to deleted image
         """
-        pass
+        raise NotImplementedError
 
-    def __next__(self):
+    def next(self):
         """increment _pos and return next element of _paths; if at end of
         _paths AND _loops_remaining > 0, wrap around to beginning of _paths and
         decrement _loops_remaining
@@ -196,10 +196,11 @@ class ImagePaths():
 #     window.clear()
 
 
-def update_image(window, sprite, image_path):
+def update_image(dt, window, sprite, image_path):
     """function for pyglet.clock.schedule_interval to call to change image
 
     Args:
+        dt (float?): time interval arg expected by clock.schedule_interval
         window (pyglet.window.Window): the window object
         sprite (pyglet.sprite.Sprite): a pyglet sprite to contain the image
         image_path (str): path to an image object
@@ -402,12 +403,34 @@ def main():
     # global image_paths
     # image_paths = get_image_paths(args['dir'])
 
+    # self, paths, loops_remaining=-1, rand_order=False, show_new_next=True
+    image_paths = ImagePaths(
+        get_image_paths(args['dir']),
+        loops_remaining=2,
+    )
+
     # global window
     window = pyglet.window.Window(fullscreen=True)
+    # this is basically what update_image does, so figure out how to initialize
+    # using that function
+    image = pyglet.image.load(image_paths.next())
+    sprite = pyglet.sprite.Sprite(image)
+    sprite.scale = get_scale(window, image)
 
     @window.event
     def on_draw():
         sprite.draw()
+
+    # # does this make sense? can I actually pass a sprite object to this
+    # # function? trying to avoid global variables as much as possible
+    # @window.event('on_draw')
+    # def parametrized_on_draw_handler(sprite):
+    #     """...
+
+    #     Args:
+    #         sprite (pyglet.sprite.Sprite): ...
+    #     """
+    #     sprite.draw()
 
     window.push_handlers(on_key_press)
 
@@ -419,7 +442,13 @@ def main():
     # sprite = pyglet.sprite.Sprite(img)
     # sprite.scale = get_scale(window, img)
 
-    pyglet.clock.schedule_interval(update_image, args['time'])
+    pyglet.clock.schedule_interval(
+        update_image,
+        args['time'],
+        window,
+        sprite,
+        image_paths.next()
+    )
     # pyglet.clock.schedule_interval(update_pan, 1/60.0)
     # pyglet.clock.schedule_interval(update_zoom, 1/60.0)
 
