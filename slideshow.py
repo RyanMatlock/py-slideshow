@@ -134,7 +134,7 @@ class ImagePaths():
                 self._pos = 0
                 self._loops_remaining -= 1
             elif self._loops_remaining == 0:
-                raise IndexError('# of _loops_remaining times exceeded')
+                raise StopIteration('ran out of _loops_remaining')
             elif self._loops_remaining == -1:  # loop indefinitely
                 self._pos = 0
             else:
