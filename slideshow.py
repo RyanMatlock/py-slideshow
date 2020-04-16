@@ -71,14 +71,18 @@ class ImagePaths():
     """keeps track of image paths and place in the list
     """
 
-    def __init__(self, paths, loops_remaining=-1, rand_order=False):
+    def __init__(
+        self, paths, loops_remaining=-1, rand_order=False, show_new_next=True
+    ):
         """
         Args:
             paths (list): list of paths to images
-            loops_remaining (int): if -1, keeps producing next image indefinitely;
-                otherwise, decrements each time it goes from end of _paths to
-                beginning
+            loops_remaining (int): if -1, keeps producing next image
+                indefinitely; otherwise, decrements each time it goes from end
+                of _paths to beginning
             rand_order (bool): if True, list order is randomized
+            show_new_next (bool): if True, show newly-added images next;
+                otherwise, leave position in loop unchanged
         """
         self._pos = 0
         # tenary operator alert
@@ -86,6 +90,7 @@ class ImagePaths():
           else paths
         self._loops_remaining = loops_remaining
         self._rand_order = rand_order
+        self._show_new_next = show_new_next
 
     def insert(self, new_img_path):
         """
@@ -94,13 +99,19 @@ class ImagePaths():
         """
         if self._rand_order:
             # insert somewhere between _pos and end of list
-            rand_index = random.randint(self._pos + 1, len(self._paths))
-            self._paths.insert(rand_index, new_img_path)
+            insert_index = random.randint(self._pos + 1, len(self._paths))
+            self._paths.insert(insert_index, new_img_path)
         else:
             if self._paths is not None:
                 self._paths.append(new_img_path)
+                insert_index = len(self._paths) - 1
             else:
                 self._paths = [new_img_path]
+                insert_index = 0
+        if self._show_new_next:
+            if len(self._paths) > 1:
+                # next method: incr _pos then returns _paths element at _pos
+                self._pos -= insert_index - 1
 
     def delete(self, deleted_img_path):
         """seems unlikely, but it could happen ¯\_(ツ)_/¯
@@ -122,19 +133,30 @@ class ImagePaths():
             if self._loops_remaining > 0:
                 self._pos = 0
                 self._loops_remaining -= 1
-            else:
+            elif self._loops_remaining == 0:
                 raise IndexError('# of _loops_remaining times exceeded')
+            elif self._loops_remaining == -1:  # loop indefinitely
+                self._pos = 0
+            else:
+                raise ValueError(
+                    f'unexpected value for _loops_remaining: '
+                    f'{self._loops_remaining}'
+                )
         return self._paths[self._pos]
 
     def prev(self):
         """decrement _pos and return previous element of _paths; if at
         beginning of _paths, wrap around to the end
+
+        note: this doesn't "rewind" _loops_remaining
         """
-        # maybe refactor this so it matches next a little closer
-        if self._pos == 0:
+        # if self._pos == 0:
+        #     self._pos = len(self._paths) - 1
+        # else:
+        #     self._pos -= 1
+        self._pos -= 1
+        if self._pos < 0:
             self._pos = len(self._paths) - 1
-        else:
-            self._pos -= 1
         return self._paths[self._pos]
 
 
@@ -266,20 +288,30 @@ def main():
         '-d', '--dir',
         help='directory of images',
     )
-    parser.add_argument(
-        '-p', '--panzoom',
-        help='enable panning and zooming',
-        action='store_true'
-    )
+    # parser.add_argument(
+    #     '-p', '--panzoom',
+    #     help='enable panning and zooming',
+    #     action='store_true'
+    # )
     parser.add_argument(
         '-t', '--time',
         help='time image is on screen (in seconds)',
         default=5.0,
         type=float
     )
+    # probably need to group --update with --update-show-next
     parser.add_argument(
         '-u', '--update',
         help='update image stack when new images are added to directory',
+        # default=True,
+        action='store_true'
+    )
+    parser.add_argument(
+        '-U', '--update-show-next',
+        help=str(
+            'update image stack when new images are added to dir and show them '
+            'next'
+        ),
         default=True,
         action='store_true'
     )
@@ -301,6 +333,7 @@ def main():
     #     type=int
     # )
     parser.add_argument(
+        # note that ntimes - 1 = _loops_remaining
         '-N', '--ntimes',
         help='loop through images N times',
         type=int,
