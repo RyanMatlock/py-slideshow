@@ -121,7 +121,7 @@ class ImagePaths():
         """
         pass
 
-    def next(self):
+    def __next__(self):
         """increment _pos and return next element of _paths; if at end of
         _paths AND _loops_remaining > 0, wrap around to beginning of _paths and
         decrement _loops_remaining
@@ -130,18 +130,25 @@ class ImagePaths():
         #     pass
         self._pos += 1
         if self._pos == len(self._paths):
-            if self._loops_remaining > 0:
-                self._pos = 0
-                self._loops_remaining -= 1
-            elif self._loops_remaining == 0:
+            #     self._pos = 0
+            #     self._loops_remaining -= 1
+            # elif self._loops_remaining == 0:
+            #     raise StopIteration('ran out of _loops_remaining')
+            # elif self._loops_remaining == -1:  # loop indefinitely
+            #     self._pos = 0
+            # else:
+            #     raise ValueError(
+            #         f'unexpected value for _loops_remaining: '
+            #         f'{self._loops_remaining}'
+            #     )
+            # let's make this a little more DRY
+            if self._loops_remaining == 0:
                 raise StopIteration('ran out of _loops_remaining')
-            elif self._loops_remaining == -1:  # loop indefinitely
-                self._pos = 0
             else:
-                raise ValueError(
-                    f'unexpected value for _loops_remaining: '
-                    f'{self._loops_remaining}'
-                )
+                self._pos = 0
+                if self._loops_remaining > 0:
+                    self._loops_remaining -= 1
+                # assume all negative values mean loop forever
         return self._paths[self._pos]
 
     def prev(self):
