@@ -167,36 +167,59 @@ class ImagePaths():
         return self._paths[self._pos]
 
 
-def update_pan_zoom_speeds():
-    global _pan_speed_x
-    global _pan_speed_y
-    global _zoom_speed
-    _pan_speed_x = random.randint(-8, 8)
-    _pan_speed_y = random.randint(-8, 8)
-    _zoom_speed = random.uniform(-0.02, 0.02)
-    return _pan_speed_x, _pan_speed_y, _zoom_speed
+# def update_pan_zoom_speeds():
+#     global _pan_speed_x
+#     global _pan_speed_y
+#     global _zoom_speed
+#     _pan_speed_x = random.randint(-8, 8)
+#     _pan_speed_y = random.randint(-8, 8)
+#     _zoom_speed = random.uniform(-0.02, 0.02)
+#     return _pan_speed_x, _pan_speed_y, _zoom_speed
 
 
-def update_pan(dt):
-    sprite.x += dt * _pan_speed_x
-    sprite.y += dt * _pan_speed_y
+# def update_pan(dt):
+#     sprite.x += dt * _pan_speed_x
+#     sprite.y += dt * _pan_speed_y
 
 
-def update_zoom(dt):
-    sprite.scale += dt * _zoom_speed
+# def update_zoom(dt):
+#     sprite.scale += dt * _zoom_speed
 
 
-def update_image(dt):
-    img = pyglet.image.load(random.choice(image_paths))
-    sprite.image = img
-    sprite.scale = get_scale(window, img)
-    sprite.x = 0
-    sprite.y = 0
-    update_pan_zoom_speeds()
+# def update_image(dt):
+#     img = pyglet.image.load(random.choice(image_paths))
+#     sprite.image = img
+#     sprite.scale = get_scale(window, img)
+#     sprite.x = 0
+#     sprite.y = 0
+#     update_pan_zoom_speeds()
+#     window.clear()
+
+
+def update_image(window, sprite, image_path):
+    """function for pyglet.clock.schedule_interval to call to change image
+
+    Args:
+        window (pyglet.window.Window): the window object
+        sprite (pyglet.sprite.Sprite): a pyglet sprite to contain the image
+        image_path (str): path to an image object
+    """
+    image = pyglet.image.load(image_path)
+    sprite.image = image
+    sprite.scale = get_scale(window, image)
+    sprite.x, sprite.y = 0, 0
     window.clear()
 
 
 def get_image_paths(input_dir='.'):
+    """use os.walk to find images in directory
+
+    Args:
+        input_dir (str): path to directory containing images
+
+    Returns:
+        list: list of paths to all images in input_dir
+    """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
@@ -207,7 +230,16 @@ def get_image_paths(input_dir='.'):
 
 
 def get_scale(window, image):
-    if image.width > image.height:
+    """determine amount by which to scale image in order to fill screen
+
+    Args:
+        window (pyglet.window.Window): window object
+        image (pyglet.image): image object
+
+    Returns:
+        float: scale factor
+    """
+    if image.width >= image.height:
         scale = float(window.width) / image.width
     else:
         scale = float(window.height) / image.height
@@ -367,10 +399,10 @@ def main():
 
     random.seed()
 
-    global image_paths
-    image_paths = get_image_paths(args['dir'])
+    # global image_paths
+    # image_paths = get_image_paths(args['dir'])
 
-    global window
+    # global window
     window = pyglet.window.Window(fullscreen=True)
 
     @window.event
@@ -379,17 +411,17 @@ def main():
 
     window.push_handlers(on_key_press)
 
-    _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
+    # _pan_speed_x, _pan_speed_y, _zoom_speed = update_pan_zoom_speeds()
 
-    global img
-    img = pyglet.image.load(random.choice(image_paths))
-    global sprite
-    sprite = pyglet.sprite.Sprite(img)
-    sprite.scale = get_scale(window, img)
+    # global img
+    # img = pyglet.image.load(random.choice(image_paths))
+    # global sprite
+    # sprite = pyglet.sprite.Sprite(img)
+    # sprite.scale = get_scale(window, img)
 
     pyglet.clock.schedule_interval(update_image, args['time'])
-    pyglet.clock.schedule_interval(update_pan, 1/60.0)
-    pyglet.clock.schedule_interval(update_zoom, 1/60.0)
+    # pyglet.clock.schedule_interval(update_pan, 1/60.0)
+    # pyglet.clock.schedule_interval(update_zoom, 1/60.0)
 
     pyglet.app.run()
     return 0
